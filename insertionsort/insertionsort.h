@@ -1,1 +1,1 @@
-int *insertionsort(int *arr);
+void insertionsort(int size, int arr[]);
