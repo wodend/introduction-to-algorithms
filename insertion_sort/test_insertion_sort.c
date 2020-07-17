@@ -1,58 +1,100 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "minunit.h"
+#include <string.h>
+
 #include "insertion_sort.h"
+#include "int_arr.h"
+#include "minunit.h"
 
 int tests_run = 0;
 
-size_t test0_size = 0;
+size_t len_test0 = 0;
 int test0[0];
 
-size_t test1_size = 2;
-int test1[2] = { 1, 0 };
+size_t len_test1 = 2;
+int test1[2] = {1, 0};
 
-size_t test2_size = 6;
-int test2[6] = {4,2,5,1,3,0};
+size_t len_test2 = 6;
+int test2[6] = {4, 2, 5, 1, 3, 0};
 
-static int arrayequal(size_t len, int a1[], int a2[]) // Assume arrays are the same size
+// Result must be freed by the caller.
+static char *message_arr(char *test, int len_a1, int *a1, int len_a2, int *a2)
 {
-	size_t i;
-	
-	for (i = 0; i < len; i++) {
-		if (a1[i] != a2[i]) {
-			return 0;
-		}
+	char *str_a1;
+	char *str_a2;
+	size_t len_message;
+	char *message;
+
+	str_a1 = arr_to_str(len_a1, a1);
+	str_a2 = arr_to_str(len_a2, a2);
+	len_message = strlen(test) + strlen(str_a1) + strlen(str_a2) + 32;
+	if (!(message = malloc(len_message * sizeof(char)))) {
+		printf("Failed to malloc (%s).", strerror(errno));
+		exit(EXIT_FAILURE);
 	}
-	return 1;
+	snprintf(message,
+			 len_message,
+			 "Failed %s, got: %s, expected: %s",
+			 test,
+			 str_a1,
+			 str_a2);
+	free(str_a1);
+	free(str_a2);
+	return message;
 }
 
 static char *insertion_sort_test0()
 {
+	char *message;
+
+	size_t len_expected = 0;
 	int expected[0];
 
-	insertion_sort(test0_size, test0);
-	mu_assert("Failed test0, expected []",
-			  arrayequal(test0_size, test0, expected));
+	insertion_sort(len_test0, test0);
+	message = message_arr("insertion_sort_test0",
+	                      len_test0,
+	                      test0,
+	                      len_expected,
+	                      expected);
+	mu_assert(message, arr_eq(len_test0, test0, len_expected, expected));
+	free(message);
 	return 0;
 }
 
 static char *insertion_sort_test1()
 {
-	int expected[2] = { 0, 1 };
+	char *message;
 
-	insertion_sort(test1_size, test1);
-	mu_assert("Failed test1, expected [0, 1]",
-			  arrayequal(test1_size, test1, expected));
+	size_t len_expected = 2;
+	int expected[2] = {0, 1};
+
+	insertion_sort(len_test1, test1);
+	message = message_arr("insertion_sort_test1",
+	                      len_test1,
+	                      test1,
+	                      len_expected,
+	                      expected);
+	mu_assert(message, arr_eq(len_test1, test1, len_expected, expected));
+	free(message);
 	return 0;
 }
 
 static char *insertion_sort_test2()
 {
-	int expected[6] = {0,1,2,3,4,5};
+	char *message;
 
-	insertion_sort(test2_size, test2);
-	mu_assert("Failed test2, expected [0, 1, 2, 3, 4, 5]",
-			  arrayequal(test2_size, test2, expected));
+	size_t len_expected = 6;
+	int expected[6] = {0, 1, 2, 3, 4, 5};
+
+	insertion_sort(len_test2, test2);
+	message = message_arr("insertion_sort_test2",
+	                      len_test2,
+	                      test2,
+	                      len_expected,
+	                      expected);
+	mu_assert(message, arr_eq(len_test2, test2, len_expected, expected));
+	free(message);
 	return 0;
 }
 
@@ -71,6 +113,7 @@ int main(int argc, char *argv[])
 	result = all_tests();
 	if (result != 0) {
 		printf("%s\n", result);
+		free(result);
 	} else {
 		printf("Passed all %d tests.\n", tests_run);
 	}
