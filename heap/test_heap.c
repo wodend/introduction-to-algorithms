@@ -44,6 +44,24 @@ static char *message_arr(char *test, int len_a1, int *a1, int len_a2, int *a2)
 	return message;
 }
 
+static char *max_heapify_test2()
+{
+	char *message;
+
+	size_t len_expected = 7;
+	int expected[7] = {2, 1, 6, 3, 4, 5, 0};
+
+	max_heapify(len_test2, test2, 0);
+	message = message_arr("max_heapify_test2",
+	                      len_test2,
+	                      test2,
+	                      len_expected,
+	                      expected);
+	mu_assert(message, arr_eq(len_test2, test2, len_expected, expected));
+	free(message);
+	return 0;
+}
+
 static char *build_max_heap_test0()
 {
 	char *message;
@@ -100,9 +118,10 @@ static char *build_max_heap_test2()
 
 static char *all_tests()
 {
-	mu_run_test(build_max_heap_test0);
-	mu_run_test(build_max_heap_test1);
-	mu_run_test(build_max_heap_test2);
+	mu_run_test(max_heapify_test2);
+	//mu_run_test(build_max_heap_test0);
+	//mu_run_test(build_max_heap_test1);
+	//mu_run_test(build_max_heap_test2);
 	return 0;
 }
 
